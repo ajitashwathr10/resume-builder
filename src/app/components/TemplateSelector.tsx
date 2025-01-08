@@ -15,7 +15,7 @@ export default function TemplateSelector({ onSelect, selected }: TemplateSelecto
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select a template" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-white"> 
           {templates.map((template) => (
             <SelectItem key={template} value={template}>
               {template.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -26,4 +26,3 @@ export default function TemplateSelector({ onSelect, selected }: TemplateSelecto
     </div>
   )
 }
-
