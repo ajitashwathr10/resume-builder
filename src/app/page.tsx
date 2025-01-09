@@ -32,17 +32,6 @@ export type ResumeData = {
     description: string
     technologies: string[]
   }>
-  basics: {
-    name: string;
-    email: string;
-  }
-  work: {
-    position: string;
-    company: string;
-    startDate: string;
-    endDate: string;
-    summary: string;
-  }
 }
 
 export type ResumeTemplate = 'entry-level' | 'career-changer' | 'mid-career' | 'specialized' | 'technical' | 'executive' | 'academic'
@@ -57,17 +46,6 @@ export default function ResumePage() {
     education: [],
     skills: [],
     projects: [],
-    basics: {
-      name: '',
-      email: ''
-    },
-    work: {
-      position: '',
-      company: '',
-      startDate: '',
-      endDate: '',
-      summary: ''
-    }
   })
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>('entry-level')
 
@@ -91,4 +69,6 @@ export default function ResumePage() {
     </div>
   )
 }
+
+
 
