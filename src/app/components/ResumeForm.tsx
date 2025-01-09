@@ -18,9 +18,9 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
     const handleArrayChange = (field: keyof ResumeData, index: number, subfield: string, value: any) => {
         const newArray = [...data[field]]
-        if (typeof newArray[index] === 'object' && newArray[index] !== null) {
-            newArray[index] = { ...newArray[index], [subfield]: value }
-            onChange({ [field]: newArray })
+        if(typeof newArray[index] === 'object' && newArray[index] !== null) {
+            newArray[index] = {...newArray[index], [subfield]: value}
+            onChange({[field]: newArray})
         }
     }
 
@@ -77,14 +77,14 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
                 />
             </div>
             <div>
-                <h3 className="text-lg font-semibold mb-2">Work Experience</h3>
+                <h3 className = 'text-lg font-semibold mb-2'>Work Experience</h3>
                 {data.experience.map((exp, index) => (
                     <div key={index} className="mb-4 p-4 border rounded">
                         <Input
                             type="text"
                             placeholder="Company"
                             value={exp.company}
-                            onChange={(e) => handleArrayChange('experience', index, 'company', e.target.value)}
+                            onChange = {(e) => handleArrayChange('experience', index, 'company', e.target.value)}
                             className="mb-2"
                         />
                         <Input
@@ -132,7 +132,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
                             type="text"
                             placeholder="School"
                             value={edu.school}
-                            onChange={(e) => handleArrayChange('education', index, 'school', e.target.value)}
+                            onChange = {(e) => handleArrayChange('education', index, 'school', e.target.value)}
                             className="mb-2"
                         />
                         <Input
@@ -166,7 +166,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
                             type="text"
                             placeholder="Skill Category"
                             value={skillCategory.category}
-                            onChange={(e) => handleArrayChange('skills', index, 'category', e.target.value)}
+                            onChange = {(e) => handleArrayChange('skills', index, 'category', e.target.value)}
                             className="mb-2"
                         />
                         <Input
