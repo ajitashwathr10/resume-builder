@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
 import ResumeForm from './components/ResumeForm'
 import ResumePreview from './components/ResumePreview'
 import TemplateSelector from './components/TemplateSelector'
@@ -32,6 +32,17 @@ export type ResumeData = {
     description: string
     technologies: string[]
   }>
+  basics: {
+    name: string;
+    email: string;
+  }
+  work: {
+    position: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    summary: string;
+  }
 }
 
 export type ResumeTemplate = 'entry-level' | 'career-changer' | 'mid-career' | 'specialized' | 'technical' | 'executive' | 'academic'
@@ -45,7 +56,18 @@ export default function ResumePage() {
     experience: [],
     education: [],
     skills: [],
-    projects: []
+    projects: [],
+    basics: {
+      name: '',
+      email: ''
+    },
+    work: {
+      position: '',
+      company: '',
+      startDate: '',
+      endDate: '',
+      summary: ''
+    }
   })
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>('entry-level')
 
