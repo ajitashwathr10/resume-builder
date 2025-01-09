@@ -32,6 +32,23 @@ export type ResumeData = {
     description: string
     technologies: string[]
   }>
+  certifications?: Array<{
+    name: string
+    issuer: string
+    date: string
+  }>
+  publications?: Array<{
+    title: string
+    publisher: string
+    date: string
+    description: string
+  }>
+  awards?: Array<{
+    title: string
+    issuer: string
+    date: string
+    description:string
+  }>
 }
 
 export type ResumeTemplate = 'entry-level' | 'career-changer' | 'mid-career' | 'specialized' | 'technical' | 'executive' | 'academic'
@@ -46,6 +63,9 @@ export default function ResumePage() {
     education: [],
     skills: [],
     projects: [],
+    certifications: [],
+    publications: [],
+    awards: []
   })
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>('entry-level')
 
@@ -54,16 +74,16 @@ export default function ResumePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Resume Builder</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className = "container mx-auto px-4 py-8">
+      <h1 className = "text-3xl font-bold mb-8 text-center">Resume Builder</h1>
+      <div className = "grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <TemplateSelector onSelect={setSelectedTemplate} selected={selectedTemplate} />
-          <ResumeForm data={resumeData} onChange={handleDataChange} template={selectedTemplate} />
+          <TemplateSelector onSelect = {setSelectedTemplate} selected = {selectedTemplate} />
+          <ResumeForm data = {resumeData} onChange = {handleDataChange} template = {selectedTemplate} />
         </div>
-        <div className="sticky top-8">
-          <ResumePreview data={resumeData} template={selectedTemplate} onChange={handleDataChange} />
-          <ExportOptions data={resumeData} template={selectedTemplate} />
+        <div className = "sticky top-8">
+          <ResumePreview data = {resumeData} template={selectedTemplate}/>
+          <ExportOptions data = {resumeData} template={selectedTemplate}/>
         </div>
       </div>
     </div>
