@@ -4,8 +4,9 @@ import {useState} from 'react'
 import ResumeForm from './components/ResumeForm'
 import ResumePreview from './components/ResumePreview'
 import TemplateSelector from './components/TemplateSelector'
-import ExportOptions from './components/ExportOptions'
+import dynamic from 'next/dynamic'
 
+const ExportOptions = dynamic(() => import('./components/ExportOptions'), {ssr: false})
 export type ResumeData = {
   name: string
   email: string
