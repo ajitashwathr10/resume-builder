@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { ResumeData, ResumeTemplate } from '../page'
-import { Button } from "@/components/ui/button"
-import { jsPDF } from 'jspdf'
-import { Document, Packer, Paragraph, TextRun } from 'docx'
+import {useState} from 'react'
+import {ResumeData, ResumeTemplate} from '../page'
+import {Button} from "@/components/ui/button"
+import {jsPDF} from 'jspdf'
+import {Document, Packer, Paragraph, TextRun} from 'docx'
 
 type ExportOptionsProps = Readonly<{
   data: ResumeData
@@ -26,7 +26,6 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
         yPos += fontSize / 2 + 2
       }
 
-      // Add content to PDF
       addText(data.name, 18, true)
       addText(`${data.email} | ${data.phone}`)
       addText('Professional Summary', 14, true)
