@@ -130,13 +130,10 @@ export default function ResumeForm({ data, onChange, template }: ResumeFormProps
                     Add Skill Category
                 </Button>
             </div>
-            {renderSection('Projects', data.projects || [], ['name', 'description', 'technologies'])}
-            {(template === 'specialized' || template === 'technical' || template === 'executive') &&
-                renderSection('Certifications', data.certifications || [], ['name', 'issuer', 'date'])}
-            {(template === 'academic' || template === 'specialized') &&
-                renderSection('Publications', data.publications || [], ['title', 'publisher', 'date', 'description'])}
-            {(template === 'executive' || template === 'academic') &&
-                renderSection('Awards', data.awards || [], ['title', 'issuer', 'date', 'description'])}
+            {['entry-level', 'carrer-changer', 'mid-carrer', 'specialized', 'technical'].includes(template) && renderSection('Projects', data.projects || [], ['name', 'description', 'technologies'])}
+            {['specialized', 'technical', 'executive'].includes(template) && renderSection('Certifications', data.certifications || [], ['name', 'issuer', 'date'])}
+            {['academic', 'specialized'].includes(template) && renderSection('Publications', data.publications || [], ['title', 'publisher', 'date', 'description'])}
+            {['executive', 'academic'].includes(template) && renderSection('Awards', data.awards || [], ['title', 'issuer', 'date', 'description'])}
         </form>
     )
 }
