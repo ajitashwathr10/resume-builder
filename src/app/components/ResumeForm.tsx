@@ -72,6 +72,17 @@ export default function ResumeForm({ data, onChange, template }: ResumeFormProps
                 />
             </div>
             <div>
+                <Label htmlFor = 'title'>Title</Label>
+                <Input
+                    type = 'text'
+                    id = 'title'
+                    name = 'title'
+                    value = {data.title || ''}
+                    onChange = {handleChange}
+                    placeholder = 'e.g., Software Engineer'
+                />
+            </div>
+            <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                     type="email"
