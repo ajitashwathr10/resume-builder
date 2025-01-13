@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 const ExportOptions = dynamic(() => import('./components/ExportOptions'), {ssr: false})
 export type ResumeData = {
   name: string
+  title: string
   email: string
   phone: string
   summary: string
@@ -57,6 +58,7 @@ export type ResumeTemplate = 'entry-level' | 'career-changer' | 'mid-career' | '
 export default function ResumePage() {
   const [resumeData, setResumeData] = useState<ResumeData>({
     name: '',
+    title: '',
     email: '',
     phone: '',
     summary: '',
