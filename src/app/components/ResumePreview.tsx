@@ -1,5 +1,4 @@
-import { ResumeData, ResumeTemplate } from '../page'
-import { JSX } from 'react'
+import {ResumeData, ResumeTemplate} from '../page'
 
 type ResumePreviewProps = Readonly<{
     data: ResumeData
@@ -7,147 +6,98 @@ type ResumePreviewProps = Readonly<{
 }>
 
 export default function ResumePreview({ data, template }: ResumePreviewProps) {
-    const renderSection = (title: string, items: any[] | undefined, renderItem: (item: any) => JSX.Element) => {
-        if (!items || items.length === 0) return null;
-        return (
-            <>
-                <h3 className="text-lg font-semibold mt-4 mb-2">{title}</h3>
-                {items.map((item, index) => (
-                    <div key={index} className="mb-4">
-                        {renderItem(item)}
-                    </div>
-                ))}
-            </>
-        )
-    }
-
-    const renderExperience = () => renderSection('Work Experience', data.experience, (exp) => (
-        <>
-            <h4 className="font-semibold">{exp.position}</h4>
-            <p>{exp.company} | {exp.startDate} - {exp.endDate}</p>
-            <p>{exp.description}</p>
-        </>
-    ))
-
-    const renderEducation = () => renderSection('Education', data.education, (edu) => (
-        <>
-            <h4 className="font-semibold">{edu.degree}</h4>
-            <p>{edu.school} | {edu.graduationDate}</p>
-        </>
-    ))
-
-    const renderSkills = () => renderSection('Skills', data.skills, (skillCategory) => (
-        <>
-            <h4 className="font-semibold">{skillCategory.category}</h4>
-            <p>{skillCategory.skills && skillCategory.skills.length > 0 ? skillCategory.skills.join(', ') : 'No skills listed'}</p>
-        </>
-    ))
-
-    const renderProjects = () => renderSection('Projects', data.projects, (project) => (
-        <>
-            <h4 className="font-semibold">{project.name}</h4>
-            <p>{project.description}</p>
-            <p><strong>Technologies:</strong> {Array.isArray(project.technologies) ? project.technologies.join(', ') : 'No technologies listed'}</p>
-        </>
-    ))
-
-    const renderCertifications = () => renderSection('Certifications', data.certifications, (cert) => (
-        <>
-            <h4 className="font-semibold">{cert.name}</h4>
-            <p>{cert.issuer} | {cert.date}</p>
-        </>
-    ))
-
-    const renderPublications = () => renderSection('Publications', data.publications, (pub) => (
-        <>
-            <h4 className="font-semibold">{pub.title}</h4>
-            <p>{pub.publisher} | {pub.date}</p>
-            <p>{pub.description}</p>
-        </>
-    ))
-
-    const renderAwards = () => renderSection('Awards', data.awards, (award) => (
-        <>
-            <h4 className="font-semibold">{award.title}</h4>
-            <p>{award.issuer} | {award.date}</p>
-            <p>{award.description}</p>
-        </>
-    ))
-
-    const templateLayouts: Record<ResumeTemplate, () => JSX.Element> = {
-        'entry-level': () => (
-            <>
-                {renderEducation()}
-                {renderSkills()}
-                {renderProjects()}
-            </>
-        ),
-        'career-changer': () => (
-            <>
-                {renderSkills()}
-                {renderProjects()}
-                {renderExperience()}
-                {renderEducation()}
-            </>
-        ),
-        'mid-career': () => (
-            <>
-                {renderExperience()}
-                {renderSkills()}
-                {renderEducation()}
-                {renderProjects()}
-            </>
-        ),
-        'specialized': () => (
-            <>
-                {renderExperience()}
-                {renderSkills()}
-                {renderCertifications()}
-                {renderProjects()}
-                {renderPublications()}
-                {renderEducation()}
-            </>
-        ),
-        'technical': () => (
-            <>
-                {renderSkills()}
-                {renderProjects()}
-                {renderExperience()}
-                {renderCertifications()}
-                {renderEducation()}
-            </>
-        ),
-        'executive': () => (
-            <>
-                {renderExperience()}
-                {renderSkills()}
-                {renderAwards()}
-                {renderCertifications()}
-                {renderEducation()}
-            </>
-        ),
-        'academic': () => (
-            <>
-                {renderEducation()}
-                {renderPublications()}
-                {renderExperience()}
-                {renderAwards()}
-                {renderSkills()}
-                {renderProjects()}
-            </>
-        ),
+    const formatDate = (date: string) => {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' });
     }
 
     return (
-        <div className="bg-white shadow-lg p-8 border border-gray-200">
-            <h2 className="text-2xl font-bold mb-4">{data.name}</h2>
-            <p className="mb-2">{data.email} | {data.phone}</p>
-            <h3 className="text-lg font-semibold mt-4 mb-2">Professional Summary</h3>
-            <p>{data.summary}</p>
-            {templateLayouts[template]()}
+        <div className = "bg-white shadow-lg p-8 border border-gray-200 max-w-[850px] mx-auto">
+            {/* Header */}
+            <div className = "text-center mb-6">
+                <h1 className = "text-2xl font-bold mb-1">{data.name || 'Your Name'}</h1>
+                <p className = "text-lg mb-1">{data.title || 'Your Title'}</p>
+                <p className = "text-sm">
+                    {data.email} • {data.phone}
+                </p>
+            </div>
+
+            {/* Summary */}
+            <div className = "mb-6">
+                <h2 className = "text-lg font-bold border-b border-gray-300 mb-2">Summary</h2>
+                <p className = "text-sm">{data.summary}</p>
+            </div>
+
+            {/* Experience */}
+            {template !== 'entry-level' && data.experience && data.experience.length > 0 && (
+                <div className = "mb-6">
+                    <h2 className = "text-lg font-bold border-b border-gray-300 mb-2">Experience</h2>
+                    {data.experience.map((exp, index) => (
+                        <div key = {index} className = "mb-4">
+                            <div className = "flex justify-between items-start">
+                                <div>
+                                    <h3 className = "font-bold text-sm">{exp.position}</h3>
+                                    <p className = "text-sm">{exp.company}</p>
+                                </div>
+                                <div className = "text-sm text-right">
+                                    {exp.startDate && exp.endDate && (
+                                        <p>{formatDate(exp.startDate)} - {formatDate(exp.endDate)}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <p className = "text-sm mt-1">{exp.description}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Education */}
+            <div className="mb-6">
+                <h2 className="text-lg font-bold border-b border-gray-300 mb-2">Education</h2>
+                {data.education && data.education.map((edu, index) => (
+                    <div key={index} className="mb-4">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="font-bold text-sm">{edu.degree}</h3>
+                                <p className="text-sm">{edu.school}</p>
+                            </div>
+                            <div className="text-sm text-right">
+                                {edu.graduationDate && <p>{formatDate(edu.graduationDate)}</p>}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Skills */}
+            <div className="mb-6">
+                <h2 className="text-lg font-bold border-b border-gray-300 mb-2">Skills</h2>
+                <div className="text-sm">
+                    {data.skills && data.skills.map((skillCategory, index) => (
+                        <div key={index} className="mb-2">
+                            <span className="font-bold">{skillCategory.category}: </span>
+                            <span>{skillCategory.skills && Array.isArray(skillCategory.skills) ? skillCategory.skills.join(', ') : ''}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Certifications */}
+            {['specialized', 'technical', 'executive'].includes(template) && data.certifications && data.certifications.length > 0 && (
+                <div className="mb-6">
+                    <h2 className="text-lg font-bold border-b border-gray-300 mb-2">Certifications</h2>
+                    {data.certifications.map((cert, index) => (
+                        <div key={index} className="mb-2 text-sm">
+                            <span className="font-bold">{cert.name}</span> — {cert.issuer} ({cert.date})
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
+
 
 
 
