@@ -2,16 +2,21 @@ import {useState} from 'react'
 import {ResumeData, ResumeTemplate} from '../page'
 import {Button} from "@/components/ui/button"
 import {jsPDF} from 'jspdf'
-import {Document, Packer, Paragraph, TextRun} from 'docx'
+import {Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType} from 'docx'
 
 type ExportOptionsProps = Readonly<{
   data: ResumeData
   template: ResumeTemplate
 }>
 
-export default function ExportOptions({ data, template }: ExportOptionsProps) {
+export default function ExportOptions({data, template}: ExportOptionsProps) {
   const [isExporting, setIsExporting] = useState(false)
 
+  const formatDate = (date: string) => {
+    if(!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {month: 'short', year: 'numeric'});
+  }
   const exportAsPDF = async () => {
     setIsExporting(true)
     try {
@@ -19,61 +24,83 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
       let yPos = 10
 
       // Helper function to add text and update yPos
-      const addText = (text: string, fontSize: number = 12, isBold: boolean = false) => {
+      const addText = (text: string, fontSize: number = 12, isBold: boolean = false, align: 'left' | 'center' = 'left') => {
         doc.setFontSize(fontSize)
         doc.setFont('helvetica', isBold ? 'bold' : 'normal')
-        doc.text(text, 10, yPos)
+        if(align === 'center') {
+          doc.text(text, doc.internal.pageSize.width / 2, yPos, {align: 'center'})
+        } else {
+          doc.text(text, 20, yPos)
+        }
         yPos += fontSize / 2 + 2
       }
 
-      addText(data.name, 18, true)
-      addText(`${data.email} | ${data.phone}`)
-      addText('Professional Summary', 14, true)
-      addText(data.summary)
+      addText(data.name, 18, true, 'center')
+      addText(data.summary?.split('|')[0] || '', 14, false, 'center')
+      addText(`${data.email} | ${data.phone}`, 12, false, 'center')
+      yPos += 10
 
-      if (template !== 'entry-level') {
-        addText('Work Experience', 14, true)
+      addText('Summary', 16, true)
+      addText(data.summary || '', 12)
+      yPos += 10
+
+      if (template !== 'entry-level' && data.experience && data.experience.length > 0) {
+        addText('Work Experience', 16, true)
         data.experience.forEach((exp) => {
-          addText(`${exp.position} at ${exp.company}`, 12, true)
-          addText(`${exp.startDate} - ${exp.endDate}`)
+          addText(`${exp.position} at ${exp.company}`, 14, true)
+          addText(`${formatDate(exp.startDate)} - ${formatDate(exp.endDate)}`)
           addText(exp.description)
           yPos += 5
         })
+        yPos += 10
       }
 
-      addText('Education', 14, true)
-      data.education.forEach((edu) => {
-        addText(`${edu.degree} - ${edu.school}`, 12, true)
-        addText(edu.graduationDate)
-        yPos += 5
-      })
-
-      addText('Skills', 14, true)
-      data.skills.forEach((skillCategory) => {
-        addText(skillCategory.category, 12, true)
-        addText(skillCategory.skills.join(', '))
-        yPos += 5
-      })
-
-      addText('Projects', 14, true)
-      data.projects.forEach((project) => {
-        addText(project.name, 12, true)
-        addText(project.description)
-        addText(`Technologies: ${project.technologies.join(', ')}`)
-        yPos += 5
-      })
-
-      // Add template-specific sections
-      if (['specialized', 'technical', 'executive'].includes(template) && data.certifications) {
-        addText('Certifications', 14, true)
-        data.certifications.forEach((cert) => {
-          addText(`${cert.name} - ${cert.issuer}`, 12, true)
-          addText(cert.date)
+      addText('Education', 16, true)
+      if(data.education) {
+        data.education.forEach((edu) => {
+          addText(`${edu.degree}`, 14, true)
+          addText(`${edu.school} | ${formatDate(edu.graduationDate)}`, 12)
           yPos += 5
         })
       }
+      yPos += 10
 
-      if (['academic', 'specialized'].includes(template) && data.publications) {
+      addText('Skills', 16, true)
+      if(data.skills) {
+        data.skills.forEach((skillCategory) => {
+          if(skillCategory.category && skillCategory.skills && Array.isArray(skillCategory.skills)) {
+            addText(`${skillCategory.category}: ${skillCategory.skills.join(', ')}`, 12)
+          }
+        })
+      }
+      yPos += 10
+
+
+      if(data.projects && data.projects.length > 0) {
+        addText('Projects', 16, true)
+        data.projects.forEach((project) => {
+          addText(project.name, 14, true)
+          addText(project.description, 12)
+          if(Array.isArray(project.technologies)) {
+            addText(`Technologies: ${project.technologies.join(', ')}`, 12)
+          } else if(typeof project.technologies === 'string') {
+            addText('Technologies: ${project.technologies}', 12)
+          }
+          yPos += 5
+        })
+        yPos += 10
+      }
+
+      // Add template-specific sections
+      if (['specialized', 'technical', 'executive'].includes(template) && data.certifications && data.certifications.length > 0) {
+        addText('Certifications', 16, true)
+        data.certifications.forEach((cert) => {
+          addText(`${cert.name} - ${cert.issuer} (${formatDate(cert.date)})`, 12)
+        })
+        yPos += 10
+      }
+
+      if (['academic', 'specialized'].includes(template) && data.publications && data.publications.length > 0) {
         addText('Publications', 14, true)
         data.publications.forEach((pub) => {
           addText(pub.title, 12, true)
@@ -83,7 +110,7 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
         })
       }
 
-      if (['executive', 'academic'].includes(template) && data.awards) {
+      if (['executive', 'academic'].includes(template) && data.awards && data.awards.length > 0) {
         addText('Awards', 14, true)
         data.awards.forEach((award) => {
           addText(award.title, 12, true)
@@ -112,18 +139,26 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
             properties: {},
             children: [
               new Paragraph({
-                children: [new TextRun({ text: data.name, bold: true, size: 28 })],
+                text: data.name,
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER,
               }),
               new Paragraph({
-                children: [new TextRun({ text: `${data.email} | ${data.phone}`, size: 24 })],
+                text: data.summary?.split('|')[0] || '',
+                alignment: AlignmentType.CENTER,
               }),
               new Paragraph({
-                children: [new TextRun({ text: 'Professional Summary', bold: true, size: 24 })],
+                text: `${data.email} | ${data.phone}`,
+                alignment: AlignmentType.CENTER,
               }),
               new Paragraph({
-                children: [new TextRun({ text: data.summary })],
+                text: 'Summary',
+                heading: HeadingLevel.HEADING_1,
               }),
-              ...generateWordSections(data, template),
+              new Paragraph({
+                text: data.summary || '',
+              }),
+              ...generateWordSections(),
             ],
           },
         ],
@@ -144,136 +179,111 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
     }
   }
 
-  const generateWordSections = (data: ResumeData, template: ResumeTemplate) => {
+  const generateWordSections = () => {
     const sections = []
 
-    if (template !== 'entry-level') {
+    if (template !== 'entry-level' && data.experience && data.experience.length > 0) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: 'Work Experience', bold: true, size: 24 })],
+          text: 'Experience',
+          heading: HeadingLevel.HEADING_1,
         })
       )
       data.experience.forEach((exp) => {
         sections.push(
           new Paragraph({
-            children: [new TextRun({ text: `${exp.position} at ${exp.company}`, bold: true })],
+            children: [
+              new TextRun({ text: `${exp.position} - ${exp.company}`, bold: true }),
+              new TextRun({ text: `\t${formatDate(exp.startDate)} - ${formatDate(exp.endDate)}`, bold: false }),
+            ],
           }),
           new Paragraph({
-            children: [new TextRun({ text: `${exp.startDate} - ${exp.endDate}` })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: exp.description })],
+            text: exp.description,
           })
         )
       })
     }
 
-    sections.push(
-      new Paragraph({
-        children: [new TextRun({ text: 'Education', bold: true, size: 24 })],
-      })
-    )
-    data.education.forEach((edu) => {
+    if (data.projects && data.projects.length > 0) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: `${edu.degree} - ${edu.school}`, bold: true })],
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: edu.graduationDate })],
+          text: 'Projects',
+          heading: HeadingLevel.HEADING_1,
         })
       )
-    })
-
-    sections.push(
-      new Paragraph({
-        children: [new TextRun({ text: 'Skills', bold: true, size: 24 })],
+      data.projects.forEach((project) => {
+        sections.push(
+          new Paragraph({
+            children: [new TextRun({text: project.name, bold: true})],
+          }),
+          new Paragraph({
+            text: project.description,
+          })
+        )
+        if (Array.isArray(project.technologies)) {
+          sections.push(
+            new Paragraph({
+              text: `Technologies: ${project.technologies.join(', ')}`,
+            })
+          )
+        } else if (typeof project.technologies === 'string') {
+          sections.push(
+            new Paragraph({
+              text: `Technologies: ${project.technologies}`,
+            })
+          )
+        }
       })
-    )
-    data.skills.forEach((skillCategory) => {
+    }
+
+    if (data.education) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: skillCategory.category, bold: true })],
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: skillCategory.skills.join(', ') })],
+          text: 'Education',
+          heading: HeadingLevel.HEADING_1,
         })
       )
-    })
-
-    sections.push(
-      new Paragraph({
-        children: [new TextRun({ text: 'Projects', bold: true, size: 24 })],
+      data.education.forEach((edu) => {
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: edu.degree, bold: true }),
+              new TextRun({ text: `\t${edu.school} | ${formatDate(edu.graduationDate)}`, bold: false }),
+            ],
+          })
+        )
       })
-    )
-    data.projects.forEach((project) => {
+    }
+
+    if (data.skills) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: project.name, bold: true })],
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: project.description })],
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: `Technologies: ${project.technologies.join(', ')}` })],
+          text: 'Skills',
+          heading: HeadingLevel.HEADING_1,
         })
       )
-    })
+      data.skills.forEach((skillCategory) => {
+        if (skillCategory.category && skillCategory.skills && Array.isArray(skillCategory.skills)) {
+          sections.push(
+            new Paragraph({
+              text: `${skillCategory.category}: ${skillCategory.skills.join(', ')}`,
+            })
+          )
+        }
+      })
+    }
 
-    if (['specialized', 'technical', 'executive'].includes(template) && data.certifications) {
+    if (['specialized', 'technical', 'executive'].includes(template) && data.certifications && data.certifications.length > 0) {
       sections.push(
         new Paragraph({
-          children: [new TextRun({ text: 'Certifications', bold: true, size: 24 })],
+          text: 'Certifications',
+          heading: HeadingLevel.HEADING_1,
         })
       )
       data.certifications.forEach((cert) => {
         sections.push(
           new Paragraph({
-            children: [new TextRun({ text: `${cert.name} - ${cert.issuer}`, bold: true })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: cert.date })],
-          })
-        )
-      })
-    }
-
-    if (['academic', 'specialized'].includes(template) && data.publications) {
-      sections.push(
-        new Paragraph({
-          children: [new TextRun({ text: 'Publications', bold: true, size: 24 })],
-        })
-      )
-      data.publications.forEach((pub) => {
-        sections.push(
-          new Paragraph({
-            children: [new TextRun({ text: pub.title, bold: true })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: `${pub.publisher} | ${pub.date}` })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: pub.description })],
-          })
-        )
-      })
-    }
-
-    if (['executive', 'academic'].includes(template) && data.awards) {
-      sections.push(
-        new Paragraph({
-          children: [new TextRun({ text: 'Awards', bold: true, size: 24 })],
-        })
-      )
-      data.awards.forEach((award) => {
-        sections.push(
-          new Paragraph({
-            children: [new TextRun({ text: award.title, bold: true })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: `${award.issuer} | ${award.date}` })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: award.description })],
+            text: `${cert.name} - ${cert.issuer} (${formatDate(cert.date)})`,
           })
         )
       })
@@ -301,4 +311,3 @@ export default function ExportOptions({ data, template }: ExportOptionsProps) {
     </div>
   )
 }
-
